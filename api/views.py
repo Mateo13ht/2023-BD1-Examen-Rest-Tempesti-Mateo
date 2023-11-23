@@ -23,9 +23,9 @@ def customers(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def customer(request, pk):
+def customer(request, customerid):
     try:
-        customer = Customers.objects.get(customerid=pk)
+        customer = Customers.objects.get(customerid=customerid)
     except customer.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -62,9 +62,9 @@ def suppliers(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def supplier(request, pk):
+def supplier(request, supplierid):
     try:
-        supplier = Suppliers.objects.get(supplierid=pk)
+        supplier = Suppliers.objects.get(supplierid=supplierid)
     except supplier.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -101,9 +101,9 @@ def categories(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def categorie(request, pk):
+def categorie(request, categoryid):
     try:
-        categorie = Categories.objects.get(categorieid=pk)
+        categorie = Categories.objects.get(categoryid=categoryid)
     except categorie.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -140,9 +140,9 @@ def products(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def product(request, pk):
+def product(request, productid):
     try:
-        product = Products.objects.get(productid=pk)
+        product = Products.objects.get(productid=productid)
     except product.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -179,9 +179,9 @@ def orders(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def order(request, pk):
+def order(request, orderid):
     try:
-        order = Orders.objects.get(productid=pk)
+        order = Orders.objects.get(orderid=orderid)
     except order.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -201,45 +201,6 @@ def order(request, pk):
         order.delete()
         return Response(status=status.HTTP_200_OK)
     
-#orders 
-@api_view(['GET', 'POST'])
-def orders(request):
-    if request.method == 'GET':
-        orders = Orders.objects.all()
-        serializer = OrdersSerializer(orders, many=True)
-        return Response(serializer.data)
-    elif request.method == 'POST':
-        serializer = OrdersSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['GET', 'PUT', 'DELETE'])
-def order(request, pk):
-    try:
-        order = Orders.objects.get(productid=pk)
-    except order.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-
-    if request.method == 'GET': 
-        serializer = OrdersSerializer(order, many=False)
-        return Response(serializer.data)
-
-    elif request.method == 'PUT':
-        serializer = OrdersSerializer(order, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method == 'DELETE':
-        order.delete()
-        return Response(status=status.HTTP_200_OK)    
-    
 #Orderdetails 
 @api_view(['GET', 'POST'])
 def orderdetails(request):
@@ -257,9 +218,9 @@ def orderdetails(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def orderdetail(request, pk):
+def orderdetail(request, orderid):
     try:
-        orderdetail = Orderdetails.objects.get(productid=pk)
+        orderdetail = Orderdetails.objects.get(orderid=orderid)
     except orderdetail.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -296,9 +257,9 @@ def employees(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def employee(request, pk):
+def employee(request, employeeid):
     try:
-        employee = Orderdetails.objects.get(productid=pk)
+        employee = Employees.objects.get(employeeid=employeeid)
     except employee.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -316,4 +277,57 @@ def employee(request, pk):
 
     elif request.method == 'DELETE':
         employee.delete()
-        return Response(status=status.HTTP_200_OK)  
+        return Response(status=status.HTTP_200_OK) 
+
+ 
+@api_view(['GET'])
+def fechaDespuesDe(request):
+    orders = Orders.objects.filter(orderdate__gt="1996-12-24")
+    serializer = OrdersSerializer(orders, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def fechaAntesDE(request):
+    orders = Orders.objects.filter(orderdate__lt="1996-12-24")
+    serializer = OrdersSerializer(orders, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def RangoFecha(request):
+    orders = Orders.objects.filter(orderdate__range=("1996-12-24","1997-1-1"))
+    serializer = OrdersSerializer(orders, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def empiezaPor(request):
+    customers = Customers.objects.filter(contactname__startswith="E")
+    serializer = CustomersSerializer(customers, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def terminaEn(request):
+    customers = Customers.objects.filter(contactname__endswith="e")
+    serializer = CustomersSerializer(customers, many=True)
+    return Response(serializer.data)
+
+
+#parte de la actividad 1
+@api_view(['GET'])
+def ordenado(request):
+    employees = Employees.objects.all().order_by('salary')
+    serializer = EmployeesSerializer(employees, many=True)
+    return Response(serializer.data)
+
+
+#parte de la actividad 2
+@api_view(['GET'])
+def poridcategori(request):
+    products = Products.objects.all().order_by('categoryid')
+    serializer = ProductsSerializer(products, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def ordenadoAlReves(request):
+    customers = Customers.objects.all().order_by('-contactname')
+    serializer = CustomersSerializer(customers, many=True)
+    return Response(serializer.data)
